@@ -1,11 +1,13 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { useCallback} from "react";
 import { Form } from "@unform/web";
 
-import api from "../../service/api";
+
 import Input from "../../components/Input";
 import {Container, Sign , Logo} from './style';
-const logo = require("../../assets/dev.png");
+import { useAuth } from "../../hooks/auth"; 
+import { useHistory } from "react-router-dom";
 
+const logo = require("../../assets/dev.png");
 
 
 
@@ -16,27 +18,37 @@ interface ITypeLogin {
 
 const SignIn:React.FC = () => {
 
- async function handlerSubmit(data:ITypeLogin){
-   try {
-        await api.post("users/auth",{
-         email:data.email,
-         password:data.password
-      });
-  
-      alert("ok");
-   } catch (error) {
-      alert("deu ruim");
-   }
- }
+const { signIn } = useAuth();
+
+const history = useHistory();
+
+const handleSubmit = useCallback(
+   async (data: ITypeLogin) => {
+     try {
+
+     await signIn({
+        email:data.email,
+        password:data.password
+     });
+
+     history.push('/dashboard');
+      
+     } catch (err) {
+       console.log(err);
+     }
+      
+   },
+   [signIn, history],
+ );
 
  return(
   <Container>
     
-      <Form onSubmit={handlerSubmit}>
+      <Form onSubmit={handleSubmit}>
        <Sign className="signIn">
         <h1>Faça seu Sign In</h1>
-        <Input type="email"   name="email" placeholder=" Please, Type your email"/>
-        <Input type="password" name="password" placeholder=" Please, Type your password"/>
+        <Input type="email"  required name="email" placeholder=" Please, Type your email"/>
+        <Input type="password" required name="password" placeholder=" Please, Type your password"/>
         <button type="submit">SignIn</button>
         </Sign>
        </Form>
